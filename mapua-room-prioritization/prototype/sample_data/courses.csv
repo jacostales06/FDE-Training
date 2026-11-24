@@ -1,0 +1,9 @@
+course_code,title,units,lec_hours,lab_hours,required_room_type,can_be_online
+MATH141,Calculus 1,3,3,0,Lecture,Y
+CHM101L,General Chemistry Lab,1,0,3,Chem Lab,N
+PHY101L,Physics 1 Lab,1,0,3,Physics Lab,N
+CS102,Computer Programming 1,3,2,3,Computer Lab,N
+CE199,Civil Engineering Thesis,3,3,0,Lecture,N
+ETHICS,Ethics,3,3,0,Lecture,Y
+MATH142,Calculus 2,3,3,0,Lecture,Y
+ARC110,Architectural Design 1,4,1,6,Drafting,N
