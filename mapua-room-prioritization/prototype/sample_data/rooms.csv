@@ -1,7 +1,8 @@
 room_id,campus,room_type,capacity,available_hours_per_week
-INT-N401,Intramuros,Lecture,45,24
+INT-N401,Intramuros,Lecture,45,33
 INT-N402,Intramuros,Lecture,45,18
-INT-CHEM1,Intramuros,Chem Lab,30,48
-INT-PHYS1,Intramuros,Physics Lab,30,48
+INT-SCI1,Intramuros,Science Lab,25,72
 INT-CL201,Intramuros,Computer Lab,40,60
 INT-DR101,Intramuros,Drafting,35,42
+MKT-L201,Makati,Lecture,40,45
+MKT-CL1,Makati,Computer Lab,40,45

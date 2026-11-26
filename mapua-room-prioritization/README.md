@@ -2,6 +2,8 @@
 
 A system design and working prototype for managing **limited physical rooms across Mapúa University campuses**. It ranks next term's course offerings so the ones that most need a physical room get one first.
 
+> **v2 (Session 2):** adds a day/time timetable with no double-booking, campus matching, prerequisite-aware demand, configurable weights, off-peak fallback, KPIs and automated tests. See [CHANGELOG.md](CHANGELOG.md).
+
 | | |
 |---|---|
 | **Stakeholders** | Students, Faculty |
@@ -29,15 +31,16 @@ There are more sections to offer than physical room-hours to hold them. So the q
 
 The full DDL is in [`sql/01_schema.sql`](sql/01_schema.sql).
 
-## 3. Step 1: Forecast demand per course
+## 3. Step 1: Forecast demand per course and campus
 
-- **Regular demand:** students whose curriculum places the course in that year level and term.
-- **Backlog demand:** students who failed or dropped the course and need to retake it.
-- **Sections needed** = CEILING(demand ÷ section size). The section size is capped at the largest room of the required type.
+- **Regular demand:** students whose curriculum places the course in that year level and term, on their own campus.
+- **Backlog demand:** students who failed or dropped the course, **counted only if they have passed every prerequisite**.
+- **Blocked by prerequisite:** students who would be due for the course but failed a prerequisite. They are reported separately and don't use a seat.
+- **Sections** = CEILING(demand ÷ section size). The section size is capped at the largest room of the required type on that campus.
 
 ## 4. Step 2: Priority score
 
-Each course offering gets a weighted score from 0 to 100. The weights are policy choices that the Registrar or Academic Affairs can adjust.
+Each course offering on each campus gets a weighted score from 0 to 100. The weights live in [`config/settings.json`](config/settings.json), so the Registrar can change policy without touching code. The weights must add up to 1.0.
 
 | Factor | Why it matters | Weight |
 |---|---|---|
@@ -46,51 +49,69 @@ Each course offering gets a weighted score from 0 to 100. The weights are policy
 | Needs a physical room | Labs and drafting can't go online, lecture-only courses can | 20% |
 | Demand size | More students affected | 15% |
 | Required vs. elective | Required courses come first | 10% |
-| Room-type scarcity | Demand-hours ÷ supply-hours for that room type | 10% |
-
-```
-Priority Score = 100 × Σ (weight × normalized factor in 0–1)
-```
+| Room-type scarcity | Demand seat-hours ÷ supply seat-hours on that campus | 10% |
 
 This is implemented as the SQL view [`sql/02_v_course_room_priority.sql`](sql/02_v_course_room_priority.sql).
 
-## 5. Step 3: Allocate rooms
+## 5. Step 3: Timetable and allocate rooms
 
-1. Sort offerings by Priority Score, highest first.
-2. For each section, assign the **smallest room of the right type that fits the class and still has weekly hours left**.
-3. Subtract the room-hours used.
-4. When room-hours run out, label the remaining sections by fallback:
-   - `can_be_online = Y` → **Online/Hybrid**
-   - otherwise → **Alternate slot / Rotating face-to-face** (evening or Saturday slots, or Group A/B alternating weeks)
+The week is a grid of 3-hour blocks, Monday to Saturday from 07:00 to 19:00. **Prime time** is Monday to Friday, 07:00 to 16:00. Offerings are processed from the highest priority score down. Each section tries these options in order:
+
+1. **Physical room, prime time:** the smallest room of the right type, on the student's campus, that fits the class. Its blocks fall on different days, and the room stays within its available hours.
+2. **Online/Hybrid,** if the course allows it. Online is better for students than evenings or Saturdays.
+3. **Physical room, off-peak:** weekday 16:00 to 19:00 or Saturday, for courses that must be face-to-face.
+4. **Unmet,** with the reason (for example *"No Science Lab at Makati"*) so the planning office can act on it.
+
+A room is never double-booked. This is enforced in code and checked by the tests.
 
 ## 6. Output: courses for room prioritization
 
 Output of the prototype on the included sample data:
 
 ```
-Rank Course    Room type      Demand  Sect  Grad  Score  Recommendation
-1    CE199     Lecture            70     2    70   68.5  Physical room
-2    MATH141   Lecture           302     8     7   47.6  Physical room
-3    CHM101L   Chem Lab          183     7    15   45.0  Physical room
-4    CS102     Computer Lab      130     4     0   39.2  Physical room
-5    PHY101L   Physics Lab        90     3     0   36.3  Physical room
-6    ARC110    Drafting           60     2     0   35.8  Physical room
-7    ETHICS    Lecture           220     6     0   30.9  4/6 physical, rest Online/Hybrid
-8    MATH142   Lecture            90     3     0   28.5  0/3 physical, rest Online/Hybrid
+#  Course   Campus     Room type      Dem Grad Blk  Score  Outcome
+1  CE199    Intramuros Lecture         52   52  18   66.3  2 Physical room
+2  CHM101L  Intramuros Science Lab    297    7   0   51.6  12 Physical room
+3  MATH141  Intramuros Lecture        303    6   0   46.3  8 Physical room
+4  CHM101L  Makati     Science Lab     80    0   0   44.0  2 Unmet (No Science Lab at Makati)
+5  PHY101L  Intramuros Science Lab     83    0   7   40.4  3 Physical room, 1 Physical room (off-peak)
+6  CS102    Intramuros Computer Lab   130    0   0   39.1  4 Physical room
+7  CS102    Makati     Computer Lab    80    0   0   36.2  2 Physical room
+8  ARC110   Intramuros Drafting        60    0   0   35.8  2 Physical room
+9  MATH142  Intramuros Lecture         95   12  13   30.6  3 Physical room
+10 ETHICS   Intramuros Lecture        220    0   0   29.6  4 Physical room, 2 Online/Hybrid
+11 MATH141  Makati     Lecture         80    0   0   27.3  2 Physical room
 ```
 
-The thesis course, where every student is graduating, is ranked first. Labs keep their rooms. When lecture rooms run out, the lecture courses that can go online move to Online/Hybrid.
+What the output shows:
+- **The thesis course ranks first** because every student in it is graduating. But 18 graduating CE students are *blocked* because they failed Calculus 2. This is why MATH142 has 12 graduating students in its backlog demand.
+- **Makati has no Science Lab**, so 80 Makati students need a cross-campus lab schedule or a new lab. v1 couldn't see this.
+- **Lecture rooms run out,** so 2 sections of Ethics, which can be taught online, move to Online/Hybrid. Labs keep their rooms, and the lowest-priority lab section moves to off-peak.
 
-Suggested filters for a dashboard: campus, program, term, room type, and recommendation.
+The engine writes these files to `prototype/output/`:
+
+| File | Contents |
+|---|---|
+| `course_priority.csv` | The ranked view, plus the outcome summary for each offering |
+| `section_allocation.csv` | Each section with its room, schedule (for example `Mon 07:00-10:00; Tue 07:00-10:00`), seat fill and reason if unmet |
+| `room_timetable.csv` | Each room's bookings by day and time block |
+| `kpis.json` | The KPIs below |
+| `report.md` | A ready-to-share report, the same content that gets written to Google Docs |
 
 ## 7. KPIs
 
-| KPI | Formula | Target |
-|---|---|---|
-| Room utilization rate | scheduled hours ÷ available hours | 75–85% |
-| Seat fill rate | enrolled ÷ room capacity per section | at least 80% |
-| Unmet physical demand | high-priority sections left without a room | 0 |
-| Graduating students delayed | graduating students affected by non-offering | 0 |
+Computed automatically in `kpis.json`. Values shown are for the sample data.
+
+| KPI | Formula | Target | Sample |
+|---|---|---|---|
+| Room utilization rate | booked hours ÷ available hours | 75–85% | 50.5% |
+| Prime-time utilization | prime blocks booked ÷ prime blocks | 75–85% | 49.5% |
+| Average seat fill | students ÷ room capacity per section | at least 80% | 87.1% |
+| Unmet sections and students | sections with no room and no allowed fallback | 0 | 2 sections, 80 students |
+| Graduating students at risk | graduating students in unmet sections | 0 | 0 |
+| Blocked by prerequisite | due students who failed a prerequisite | track | 38 |
+
+Low utilization next to unmet demand means the **room mix**, not the number of rooms, is the problem. In the sample data, Makati has a lecture room and a computer lab but no science lab.
 
 ## 8. Running the prototype
 
@@ -100,19 +121,21 @@ Requires Python 3.8+ and no other dependencies. It uses the built-in `sqlite3` m
 python prototype/prioritize.py
 ```
 
-Options: `--data <folder of CSVs>`, `--next-term-no 2`, `--next-term 2026-2`, `--section-size 40`, `--out <folder>`.
+```bash
+python -m unittest discover -s tests -v
+```
 
-It writes `output/course_priority.csv` (the ranked view) and `output/section_allocation.csv` (the room or fallback for each section). To use real data, export your tables to CSVs with the same columns as `prototype/sample_data/`.
+Options: `--data <folder of CSVs>`, `--config <settings.json>` and `--out <folder>`. The term, section size, weights and time grid are set in `config/settings.json`. To use real data, export your tables to CSVs with the same columns as `prototype/sample_data/`.
 
 **Note:** The sample data is synthetic. Student numbers, enrollment counts and room IDs are made up for demonstration.
 
-**SQL dialect:** The view uses SQLite syntax. For PostgreSQL or MySQL, replace the two-argument `MIN(x, 1)` with `LEAST(x, 1)`. For SQL Server, use a `CASE` expression instead.
+**SQL dialect:** The view uses SQLite syntax. For PostgreSQL or MySQL, replace the two-argument `MIN(x, 1)` with `LEAST(x, 1)`.
 
 ## 9. Limitations and next steps
 
-- Allocation counts weekly room-hours but doesn't build a timetable yet. The next step is adding day and time slots, faculty availability, and conflict checks, for example with an integer-programming solver such as OR-Tools.
-- Campus matching (which campus students attend) isn't applied in allocation yet.
-- Demand from irregular students could be improved by checking whether they have met the prerequisites, and by using historical enrollment rates.
+- **Student timetable conflicts:** the engine prevents room double-booking but doesn't yet stop two required courses of the same block section from landing in the same time slot. The next step is block-section conflict constraints, for example with OR-Tools CP-SAT.
+- **Faculty:** faculty loading and availability aren't modelled yet.
+- **Historical rates:** demand forecasting could use pass and fail rates from past terms.
 
 ## 10. Suggested rollout
 

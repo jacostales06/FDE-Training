@@ -1,0 +1,18 @@
+{
+  "next_term_no": 2,
+  "next_term": "2026-2",
+  "section_size": 40,
+  "block_hours": 3,
+  "weights": {
+    "graduating": 0.25,
+    "bottleneck": 0.20,
+    "needs_physical": 0.20,
+    "demand": 0.15,
+    "required": 0.10,
+    "scarcity": 0.10
+  },
+  "days": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+  "blocks": ["07:00-10:00", "10:00-13:00", "13:00-16:00", "16:00-19:00"],
+  "prime_days": ["Mon", "Tue", "Wed", "Thu", "Fri"],
+  "prime_blocks": ["07:00-10:00", "10:00-13:00", "13:00-16:00"]
+}
