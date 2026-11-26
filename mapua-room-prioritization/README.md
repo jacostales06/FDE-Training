@@ -145,6 +145,8 @@ Slides: 1. The problem · 2. The improved solution · 3. What changed since Sess
 
 The results were also sent to Google Workspace through MCP connectors: a Google Doc report, a Google Sheet (Sections, Room timetable, KPIs) and a Gmail draft to department chairs. The draft is not sent; a person reviews and sends it.
 
+**Website (Vercel):** `index.html` is a static landing page with the results, the comparison and links to the deck. The repo's root `vercel.json` serves this folder with no build step, so importing the repo into Vercel deploys it and every push to `main` redeploys it.
+
 ## 10. Limitations and next steps
 
 - **Student timetable conflicts:** the engine prevents room double-booking but doesn't yet stop two required courses of the same block section from landing in the same time slot. The next step is block-section conflict constraints, for example with OR-Tools CP-SAT.

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Room Prioritization v2</title>
+<meta name="description" content="Offering prioritization for limited physical rooms across Mapúa University campuses: design, results and Session 2 deck.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600&display=swap">
+<style>
+  :root {
+    --bg: #F7F5F0; --card: #FFFDF8; --paper: #ECE8DF; --ink: #14213D; --soft: #4A5568;
+    --line: #D6D0C4; --accent: #B3122E; --good-bg: #DCEBE2; --good: #1D5B3A; --warn-bg: #FBEBC8; --warn: #6B4A07;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0F1729; --card: #17223A; --paper: #1D2A45; --ink: #EEF1F6; --soft: #B8C2D6;
+      --line: #2C3A58; --accent: #F08A9B; --good-bg: #183A2A; --good: #9ED7B5; --warn-bg: #3D3112; --warn: #F2D38A;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.55 Inter, Arial, sans-serif; }
+  main { max-width: 1040px; margin: 0 auto; padding: 48px 16px 64px; }
+  h1, h2, h3 { font-family: 'Space Grotesk', Arial, sans-serif; line-height: 1.15; margin: 0; }
+  h1 { font-size: clamp(32px, 5vw, 52px); }
+  h2 { font-size: 28px; margin: 56px 0 16px; }
+  h3 { font-size: 19px; }
+  p { margin: 0 0 12px; }
+  a { color: var(--accent); }
+  .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: 2px; color: var(--accent); margin-bottom: 12px; }
+  .lead { font-size: 19px; color: var(--soft); margin-top: 16px; max-width: 760px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .btn { display: inline-block; padding: 12px 20px; border-radius: 8px; font-weight: 600; text-decoration: none; border: 2px solid var(--ink); color: var(--ink); }
+  .btn.primary { background: var(--ink); color: var(--bg); }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 20px; }
+  .card p { color: var(--soft); font-size: 15px; margin: 8px 0 0; }
+  .num { color: var(--accent); font-weight: 600; font-size: 14px; }
+  .stat { border-left: 4px solid var(--accent); padding: 4px 0 4px 16px; }
+  .stat b { display: block; font-family: 'Space Grotesk', Arial, sans-serif; font-size: 40px; line-height: 1.1; }
+  .stat span { color: var(--soft); font-size: 15px; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--card); }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; min-width: 720px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  th { background: var(--paper); font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; }
+  .chain { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 16px; }
+  .pill { padding: 8px 14px; border-radius: 999px; background: var(--paper); font-weight: 600; font-size: 15px; }
+  .tag { display: inline-block; margin-top: 12px; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; }
+  .tag.done { background: var(--good-bg); color: var(--good); }
+  .tag.wait { background: var(--warn-bg); color: var(--warn); }
+  .note { color: var(--soft); font-size: 14px; margin-top: 12px; }
+  footer { margin-top: 64px; color: var(--soft); font-size: 14px; border-top: 1px solid var(--line); padding-top: 20px; }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">MAPÚA UNIVERSITY · ROOM UTILIZATION · SESSION 2</p>
+  <h1>Too many sections, too few of the right rooms</h1>
+  <p class="lead">An offering-prioritization engine that ranks every course offering, then books real rooms and times, highest priority first. Built from Curriculum, Courses, Rooms and Enrolled Students data.</p>
+  <div class="actions">
+    <a class="btn primary" href="presentation/RoomPrioritization_v2_deck.html">View the 5-slide deck</a>
+    <a class="btn" href="presentation/RoomPrioritization_v2_deck.pdf">Download PDF</a>
+    <a class="btn" href="https://github.com/jacostales06/FDE-Training/tree/main/mapua-room-prioritization">Source on GitHub</a>
+  </div>
+
+  <h2>How it works</h2>
+  <div class="grid">
+    <div class="card"><span class="num">1</span><h3>Forecast demand</h3><p>Per course and campus. Only students who passed the prerequisites count.</p></div>
+    <div class="card"><span class="num">2</span><h3>Score priority</h3><p>Six weighted factors: graduating share, bottleneck, needs a lab, demand, required, scarcity.</p></div>
+    <div class="card"><span class="num">3</span><h3>Timetable</h3><p>Mon–Sat 3-hour blocks. Right room type, campus and size. No double-booking.</p></div>
+    <div class="card"><span class="num">4</span><h3>View and report</h3><p>Ranked view, section schedule, room timetable, KPIs and a shareable report.</p></div>
+  </div>
+  <p style="margin-top:20px;font-weight:600">When rooms run out, each section falls back in this order:</p>
+  <div class="chain"><span class="pill">Prime-time room</span>›<span class="pill">Online, if allowed</span>›<span class="pill">Evening/Saturday room</span>›<span class="pill">Unmet + reason</span></div>
+
+  <h2>What changed since Session 1</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Area</th><th>Session 1 (v1)</th><th>Session 2 (v2)</th></tr>
+    <tr><td>Scheduling</td><td>Weekly room-hours only</td><td>Mon–Sat timetable, no double-booking</td></tr>
+    <tr><td>Campus</td><td>Ignored</td><td>Matched by campus; missing rooms flagged</td></tr>
+    <tr><td>Prerequisites</td><td>Every failed student counted</td><td>Only eligible students; blocked ones reported</td></tr>
+    <tr><td>Fallbacks</td><td>A room, or a text label</td><td>Prime › Online › Off-peak › Unmet + reason</td></tr>
+    <tr><td>Policy weights</td><td>Hard-coded in SQL</td><td>Settings file, checked to sum to 1.0</td></tr>
+    <tr><td>Reporting</td><td>Terminal only</td><td>Google Doc, Google Sheet and Gmail draft through MCP</td></tr>
+    <tr><td>Quality</td><td>Checked by hand</td><td>9 automated tests, all passing</td></tr>
+  </table></div>
+
+  <h2>Results on sample data</h2>
+  <div class="grid">
+    <div class="stat"><b>47</b><span>sections for 590 students</span></div>
+    <div class="stat"><b>43</b><span>got a physical room</span></div>
+    <div class="stat"><b>87.1%</b><span>average seat fill</span></div>
+    <div class="stat"><b>50.5%</b><span>room utilization</span></div>
+  </div>
+  <div class="grid" style="margin-top:20px">
+    <div class="card"><h3>Graduates come first</h3><p>Thesis ranks #1, but 18 graduating students are blocked by a failed Calculus 2.</p></div>
+    <div class="card"><h3>Makati has no science lab</h3><p>80 students are unmet while other rooms sit half empty: the gap is the room mix, not the room count.</p></div>
+    <div class="card"><h3>Policy-driven fallbacks</h3><p>2 Ethics sections go online; 1 Physics lab moves to an evening slot. 0 graduating students at risk.</p></div>
+  </div>
+
+  <h2>Courses for room prioritization</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Rank</th><th>Course</th><th>Campus</th><th>Room type</th><th>Demand</th><th>Graduating</th><th>Blocked</th><th>Score</th><th>Outcome</th></tr>
+    <tr><td class="n">1</td><td>CE199</td><td>Intramuros</td><td>Lecture</td><td class="n">52</td><td class="n">52</td><td class="n">18</td><td class="n">66.3</td><td>2 physical</td></tr>
+    <tr><td class="n">2</td><td>CHM101L</td><td>Intramuros</td><td>Science Lab</td><td class="n">297</td><td class="n">7</td><td class="n">0</td><td class="n">51.6</td><td>12 physical</td></tr>
+    <tr><td class="n">3</td><td>MATH141</td><td>Intramuros</td><td>Lecture</td><td class="n">303</td><td class="n">6</td><td class="n">0</td><td class="n">46.3</td><td>8 physical</td></tr>
+    <tr><td class="n">4</td><td>CHM101L</td><td>Makati</td><td>Science Lab</td><td class="n">80</td><td class="n">0</td><td class="n">0</td><td class="n">44.0</td><td>2 unmet: no Science Lab at Makati</td></tr>
+    <tr><td class="n">5</td><td>PHY101L</td><td>Intramuros</td><td>Science Lab</td><td class="n">83</td><td class="n">0</td><td class="n">7</td><td class="n">40.4</td><td>3 physical, 1 off-peak</td></tr>
+    <tr><td class="n">6</td><td>CS102</td><td>Intramuros</td><td>Computer Lab</td><td class="n">130</td><td class="n">0</td><td class="n">0</td><td class="n">39.1</td><td>4 physical</td></tr>
+    <tr><td class="n">7</td><td>CS102</td><td>Makati</td><td>Computer Lab</td><td class="n">80</td><td class="n">0</td><td class="n">0</td><td class="n">36.2</td><td>2 physical</td></tr>
+    <tr><td class="n">8</td><td>ARC110</td><td>Intramuros</td><td>Drafting</td><td class="n">60</td><td class="n">0</td><td class="n">0</td><td class="n">35.8</td><td>2 physical</td></tr>
+    <tr><td class="n">9</td><td>MATH142</td><td>Intramuros</td><td>Lecture</td><td class="n">95</td><td class="n">12</td><td class="n">13</td><td class="n">30.6</td><td>3 physical</td></tr>
+    <tr><td class="n">10</td><td>ETHICS</td><td>Intramuros</td><td>Lecture</td><td class="n">220</td><td class="n">0</td><td class="n">0</td><td class="n">29.6</td><td>4 physical, 2 online/hybrid</td></tr>
+    <tr><td class="n">11</td><td>MATH141</td><td>Makati</td><td>Lecture</td><td class="n">80</td><td class="n">0</td><td class="n">0</td><td class="n">27.3</td><td>2 physical</td></tr>
+  </table></div>
+
+  <h2>Connected through MCP</h2>
+  <div class="grid">
+    <div class="card"><h3>Google Docs</h3><p>Registrar report: KPIs, key findings and the ranked course table.</p><span class="tag done">Done</span></div>
+    <div class="card"><h3>Google Sheets</h3><p>Scheduling sheet: Sections, Room timetable and KPI tabs.</p><span class="tag done">Done</span></div>
+    <div class="card"><h3>Gmail</h3><p>Alert to department chairs: unmet, online and off-peak sections, plus prerequisite holds.</p><span class="tag wait">Draft, reviewed before sending</span></div>
+    <div class="card"><h3>Claude Docs (extra)</h3><p>Live presenter brief with run of show, results and Q&amp;A.</p><span class="tag done">Done</span></div>
+  </div>
+  <p class="note">The Google files and email draft are private to their owner and are not linked from this public page.</p>
+
+  <footer>All figures come from synthetic sample data; no real Mapúa student or room records are used. Code, SQL view and tests: <a href="https://github.com/jacostales06/FDE-Training/tree/main/mapua-room-prioritization">GitHub</a>.</footer>
+</main>
+</body>
+</html>
