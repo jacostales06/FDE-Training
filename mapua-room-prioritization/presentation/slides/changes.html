@@ -1,0 +1,16 @@
+<section id="changes" class="footed">
+<p class="eyebrow">WHAT CHANGED SINCE SESSION 1</p>
+<h2>From a ranked list to a working timetable</h2>
+<table class="changes-table">
+<tr><th style="width:20%">Area</th><th style="width:34%">Session 1 (v1)</th><th style="width:46%">Session 2 (v2)</th></tr>
+<tr><td>Scheduling</td><td>Weekly room-hours only</td><td>Mon–Sat timetable, no double-booking</td></tr>
+<tr><td>Campus</td><td>Ignored</td><td>Matched by campus; missing rooms flagged</td></tr>
+<tr><td>Prerequisites</td><td>Every failed student counted</td><td>Only eligible students; blocked ones reported</td></tr>
+<tr><td>Fallbacks</td><td>A room, or a text label</td><td>Prime › Online › Off-peak › Unmet + reason</td></tr>
+<tr><td>Policy weights</td><td>Hard-coded in SQL</td><td>Settings file, checked to sum to 1.0</td></tr>
+<tr><td>KPIs</td><td>Described in the README</td><td>Computed on every run</td></tr>
+<tr><td>Quality</td><td>Checked by hand</td><td>9 automated tests, all passing</td></tr>
+</table>
+<p class="footer">Full diff: github.com/jacostales06/FDE-Training/compare/c2fbc0a...main</p>
+<aside>Session 1 ranked courses but could not say when or where a class meets, so two sections could be given the same room at the same time. It also ignored campus and counted students who were not yet eligible. v2 fixes all three, moves the weights into a settings file, computes the KPIs every run and adds nine tests that guard the hard rules. Open CHANGELOG.md in the repo if anyone wants detail.</aside>
+</section>

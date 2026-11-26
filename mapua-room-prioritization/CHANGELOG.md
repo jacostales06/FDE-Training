@@ -13,7 +13,8 @@ Compare with Session 1: [`c2fbc0a...main`](https://github.com/jacostales06/FDE-T
 | **Policy weights** | Hard-coded in SQL. | `config/settings.json`, checked to add up to 1.0. The Registrar can change them without code. |
 | **KPIs** | Described in the README. | Computed every run in `kpis.json`: utilization, prime-time use, seat fill, unmet, graduating students at risk, prerequisite-blocked. |
 | **Outputs** | 2 CSVs. | Ranked view, section allocation with schedule, room timetable, KPIs, Markdown report. |
-| **Reporting** | Terminal only. | `report.md` generated every run, ready to write into a Google Doc through the Google Docs MCP for stakeholders who don't use GitHub. |
+| **Reporting** | Terminal only. | Published through MCP: a Google Doc report (created with Drive, key findings added with the Docs connector), a Google Sheet with Sections, Room timetable and KPI tabs, and a Gmail draft to department chairs (not sent). |
+| **Presentation** | None. | 5-slide deck in `presentation/` (PDF, standalone HTML and slide sources). |
 | **Quality** | Checked by hand. | 9 automated tests: no double-booking; room type, campus and capacity match; hours cap; every student placed; online only where allowed; prerequisite logic; weights validation. |
 | **Bug fixed** | Sections could exceed lab capacity. In the first run, 37 students were put in 30-seat labs. | Section size is capped by the largest matching room on that campus. This is covered by a test. |
 

@@ -1,0 +1,176 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Room Prioritization v2</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@400;600&display=swap">
+<style>
+p, h1, h2, h3 { margin: 0; }
+:root {
+  --dark: #14213D;
+  --dark-2: #1F2F52;
+  --light: #F7F5F0;
+  --paper: #ECE8DF;
+  --accent: #B3122E;
+  --accent-soft: #F6DDE1;
+  --ink-soft: #4A5568;
+  --on-dark-soft: #C9D3E6;
+  --line: #D6D0C4;
+}
+
+body { font-family: 'Inter', Arial, sans-serif; color: var(--dark); }
+
+section { padding: 128px; background: var(--light); display: flex; flex-direction: column; }
+section.dark { background: var(--dark); color: var(--light); }
+section.footed { padding: 128px 128px 160px; }
+
+h1, h2, h3 { font-family: 'Space Grotesk', Arial, sans-serif; }
+h1 { font-size: 96px; font-weight: 700; line-height: 1.05; }
+h2 { font-size: 64px; font-weight: 700; line-height: 1.1; margin-bottom: 48px; }
+h3 { font-size: 32px; font-weight: 600; line-height: 1.2; }
+p { font-size: 28px; line-height: 1.4; }
+
+.eyebrow { font-size: 24px; font-weight: 600; letter-spacing: 2px; color: var(--accent); margin-bottom: 24px; }
+.dark .eyebrow { color: #F08A9B; }
+.lead { font-size: 32px; color: var(--ink-soft); margin-top: 32px; width: 1300px; }
+.dark .lead { color: var(--on-dark-soft); }
+
+/* problem slide */
+.facts { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 24px; margin-top: auto; }
+.fact { background: var(--dark-2); border-top: 6px solid var(--accent); padding: 32px; }
+.fact .label { font-size: 24px; font-weight: 600; color: #F08A9B; margin-bottom: 12px; }
+.fact .val { font-size: 28px; color: var(--light); line-height: 1.35; }
+
+/* solution slide */
+.flow { display: flex; align-items: stretch; gap: 16px; }
+.step { flex: 1; background: #FFFDF8; border: 2px solid var(--line); padding: 32px; }
+.step .num { font-size: 24px; font-weight: 600; color: var(--accent); margin-bottom: 8px; }
+.step .desc { font-size: 26px; color: var(--ink-soft); margin-top: 12px; line-height: 1.35; }
+.arrow { width: 40px; height: 22px; background: var(--accent); align-self: center; }
+.chain-title { font-size: 26px; font-weight: 600; margin-top: 56px; margin-bottom: 16px; }
+.chain { display: flex; align-items: center; gap: 16px; }
+.pill { font-size: 26px; font-weight: 600; padding: 16px 28px; border-radius: 40px; background: var(--paper); color: var(--dark); }
+.pill.first { background: var(--dark); color: var(--light); }
+.pill.last { background: var(--accent-soft); color: #7A0C20; }
+.chev { font-size: 32px; color: var(--accent); font-weight: 700; }
+
+/* changes slide */
+.changes-table { font-size: 26px; color: var(--dark); width: 1664px; }
+.footer { position: absolute; left: 128px; bottom: 64px; width: 1664px; font-size: 24px; color: var(--ink-soft); }
+
+/* results slide */
+.stats { display: flex; gap: 24px; }
+.stat { flex: 1; border-left: 6px solid var(--accent); padding: 8px 0 8px 28px; }
+.stat .big { font-family: 'Space Grotesk', Arial, sans-serif; font-size: 88px; font-weight: 700; line-height: 1; color: var(--dark); }
+.stat .cap { font-size: 24px; color: var(--ink-soft); margin-top: 12px; line-height: 1.3; }
+.insights { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-top: 56px; }
+.insight { background: var(--light); padding: 32px; }
+.insight .desc { font-size: 26px; color: var(--ink-soft); margin-top: 12px; line-height: 1.35; }
+
+/* mcp slide */
+.mcps { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 24px; }
+.mcp { background: #FFFDF8; border: 2px solid var(--line); padding: 32px; display: flex; flex-direction: column; }
+.mcp.extra { border: 2px solid var(--accent); }
+.mcp .kind { font-size: 24px; font-weight: 600; color: var(--accent); margin-bottom: 8px; }
+.mcp .desc { font-size: 26px; color: var(--ink-soft); margin-top: 12px; line-height: 1.35; }
+.status { font-size: 24px; font-weight: 600; padding: 10px 18px; border-radius: 8px; margin-top: auto; }
+.status.done { background: #DCEBE2; color: #1D5B3A; }
+.status.wait { background: #FBEBC8; color: #6B4A07; }
+.status.todo { background: var(--paper); color: var(--dark); }
+.spacer { height: 24px; }
+
+/* arrival motion */
+.rise { animation: rise 500ms ease-out both; animation-delay: calc(var(--i) * 120ms); }
+@keyframes rise { from { opacity: 0; transform: translate(0px, 24px); } to { opacity: 1; transform: translate(0px, 0px); } }
+
+
+@page { size: 1920px 1080px; margin: 0; }
+html, body { margin: 0; background: #2b2b2b; }
+section { width: 1920px; height: 1080px; box-sizing: border-box; position: relative; overflow: hidden; margin: 0 auto 24px; page-break-after: always; }
+x-shape { display: block; clip-path: polygon(0 30%, 60% 30%, 60% 0, 100% 50%, 60% 100%, 60% 70%, 0 70%); }
+@media print { html, body { background: none; } section { margin: 0; } .rise { animation: none; } }
+
+.rise { animation: none; }
+</style></head><body>
+<section id="problem" class="dark">
+<p class="eyebrow">MAPÚA UNIVERSITY · ROOM UTILIZATION · SESSION 2</p>
+<h1>Too many sections, too few of the right rooms</h1>
+<p class="lead">Every term, more course sections need a face-to-face room than our campuses can hold. Who gets a room should follow policy, not first come, first served.</p>
+<div class="facts">
+<div class="fact rise" style="--i:1"><p class="label">Stakeholders</p><p class="val">Students and faculty</p></div>
+<div class="fact rise" style="--i:2"><p class="label">Problem</p><p class="val">Limited physical rooms across campuses</p></div>
+<div class="fact rise" style="--i:3"><p class="label">Input data</p><p class="val">Curriculum, courses, rooms, enrolled students</p></div>
+<div class="fact rise" style="--i:4"><p class="label">Output</p><p class="val">A ranked view of courses for room priority</p></div>
+</div>
+
+</section>
+
+<section id="solution">
+<p class="eyebrow">THE IMPROVED SOLUTION · V2</p>
+<h2>Rank every offering, then book real rooms and times</h2>
+<div class="flow">
+<div class="step rise" style="--i:1"><p class="num">1</p><h3>Forecast demand</h3><p class="desc">Per course and campus. Only students who passed the prerequisites count.</p></div>
+<x-shape kind="arrow-right" class="arrow"></x-shape>
+<div class="step rise" style="--i:2"><p class="num">2</p><h3>Score priority</h3><p class="desc">Six weighted factors: graduating share, bottleneck, needs a lab, demand, required, scarcity.</p></div>
+<x-shape kind="arrow-right" class="arrow"></x-shape>
+<div class="step rise" style="--i:3"><p class="num">3</p><h3>Timetable</h3><p class="desc">Mon–Sat 3-hour blocks. Right room type, campus and size. No double-booking.</p></div>
+<x-shape kind="arrow-right" class="arrow"></x-shape>
+<div class="step rise" style="--i:4"><p class="num">4</p><h3>View and report</h3><p class="desc">Ranked view, section schedule, room timetable, KPIs, shareable report.</p></div>
+</div>
+<p class="chain-title">When rooms run out, each section falls back in this order:</p>
+<div class="chain rise" style="--i:5">
+<p class="pill first">Prime-time room</p><p class="chev">›</p>
+<p class="pill">Online, if allowed</p><p class="chev">›</p>
+<p class="pill">Evening/Saturday room</p><p class="chev">›</p>
+<p class="pill last">Unmet + reason</p>
+</div>
+
+</section>
+
+<section id="changes" class="footed">
+<p class="eyebrow">WHAT CHANGED SINCE SESSION 1</p>
+<h2>From a ranked list to a working timetable</h2>
+<table class="changes-table">
+<tr><th style="width:20%">Area</th><th style="width:34%">Session 1 (v1)</th><th style="width:46%">Session 2 (v2)</th></tr>
+<tr><td>Scheduling</td><td>Weekly room-hours only</td><td>Mon–Sat timetable, no double-booking</td></tr>
+<tr><td>Campus</td><td>Ignored</td><td>Matched by campus; missing rooms flagged</td></tr>
+<tr><td>Prerequisites</td><td>Every failed student counted</td><td>Only eligible students; blocked ones reported</td></tr>
+<tr><td>Fallbacks</td><td>A room, or a text label</td><td>Prime › Online › Off-peak › Unmet + reason</td></tr>
+<tr><td>Policy weights</td><td>Hard-coded in SQL</td><td>Settings file, checked to sum to 1.0</td></tr>
+<tr><td>KPIs</td><td>Described in the README</td><td>Computed on every run</td></tr>
+<tr><td>Quality</td><td>Checked by hand</td><td>9 automated tests, all passing</td></tr>
+</table>
+<p class="footer">Full diff: github.com/jacostales06/FDE-Training/compare/c2fbc0a...main</p>
+
+</section>
+
+<section id="results" class="footed" style="background:var(--paper)">
+<p class="eyebrow">RESULTS ON SAMPLE DATA</p>
+<h2>The gap is the room mix, not the room count</h2>
+<div class="stats">
+<div class="stat rise" style="--i:1"><p class="big">47</p><p class="cap">sections for 590 students</p></div>
+<div class="stat rise" style="--i:2"><p class="big">43</p><p class="cap">got a physical room</p></div>
+<div class="stat rise" style="--i:3"><p class="big">87%</p><p class="cap">average seat fill</p></div>
+<div class="stat rise" style="--i:4"><p class="big">51%</p><p class="cap">room utilization</p></div>
+</div>
+<div class="insights">
+<div class="insight rise" style="--i:5"><h3>Graduates come first</h3><p class="desc">Thesis ranks #1, but 18 graduating students are blocked by a failed Calculus 2.</p></div>
+<div class="insight rise" style="--i:6"><h3>Makati has no science lab</h3><p class="desc">80 students are unmet while other rooms sit half empty.</p></div>
+<div class="insight rise" style="--i:7"><h3>Policy-driven fallbacks</h3><p class="desc">2 Ethics sections go online; 1 Physics lab moves to an evening slot.</p></div>
+</div>
+<p class="footer">Synthetic sample data. Real student and room records are not used.</p>
+
+</section>
+
+<section id="mcp" class="footed">
+<p class="eyebrow">CONNECTED THROUGH MCP</p>
+<h2>Results go where people already work</h2>
+<div class="mcps">
+<div class="mcp rise" style="--i:1"><p class="kind">GOOGLE DOCS</p><h3>Registrar report</h3><p class="desc">KPIs, key findings and the ranked course table, written into a Google Doc.</p><div class="spacer"></div><p class="status done">Done · doc created</p></div>
+<div class="mcp rise" style="--i:2"><p class="kind">GOOGLE SHEETS</p><h3>Scheduling sheet</h3><p class="desc">47 sections with rooms and times, a room timetable and a KPI tab to filter and adjust.</p><div class="spacer"></div><p class="status done">Done · 3 tabs filled</p></div>
+<div class="mcp rise" style="--i:3"><p class="kind">GMAIL</p><h3>Chair alert</h3><p class="desc">Draft to department chairs: unmet, online and off-peak sections, plus prerequisite holds.</p><div class="spacer"></div><p class="status wait">Draft ready · you send it</p></div>
+<div class="mcp extra rise" style="--i:4"><p class="kind">EXTRA: CLAUDE DOCS</p><h3>Presenter brief</h3><p class="desc">A live, commentable brief with the run of show, v1 vs v2 table, results and Q&amp;A.</p><div class="spacer"></div><p class="status done">Done · live now</p></div>
+</div>
+<p class="footer">Also used: Google Drive to create the Doc and Sheet, and GitHub through MCP to push v1, v2 and this deck.</p>
+
+</section>
+
+</body></html>

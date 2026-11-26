@@ -1,0 +1,21 @@
+<section id="solution">
+<p class="eyebrow">THE IMPROVED SOLUTION · V2</p>
+<h2>Rank every offering, then book real rooms and times</h2>
+<div class="flow">
+<div class="step rise" style="--i:1"><p class="num">1</p><h3>Forecast demand</h3><p class="desc">Per course and campus. Only students who passed the prerequisites count.</p></div>
+<x-shape kind="arrow-right" class="arrow"></x-shape>
+<div class="step rise" style="--i:2"><p class="num">2</p><h3>Score priority</h3><p class="desc">Six weighted factors: graduating share, bottleneck, needs a lab, demand, required, scarcity.</p></div>
+<x-shape kind="arrow-right" class="arrow"></x-shape>
+<div class="step rise" style="--i:3"><p class="num">3</p><h3>Timetable</h3><p class="desc">Mon–Sat 3-hour blocks. Right room type, campus and size. No double-booking.</p></div>
+<x-shape kind="arrow-right" class="arrow"></x-shape>
+<div class="step rise" style="--i:4"><p class="num">4</p><h3>View and report</h3><p class="desc">Ranked view, section schedule, room timetable, KPIs, shareable report.</p></div>
+</div>
+<p class="chain-title">When rooms run out, each section falls back in this order:</p>
+<div class="chain rise" style="--i:5">
+<p class="pill first">Prime-time room</p><p class="chev">›</p>
+<p class="pill">Online, if allowed</p><p class="chev">›</p>
+<p class="pill">Evening/Saturday room</p><p class="chev">›</p>
+<p class="pill last">Unmet + reason</p>
+</div>
+<aside>Walk the four steps left to right. Step 1 is where v2 got smarter: demand is per campus and checks prerequisites. Step 2 is the policy: weights live in a settings file the Registrar controls. Step 3 is new: a real timetable, so no room is ever double-booked. The fallback chain is the policy for what happens when rooms run out: courses that can go online do that before anyone is pushed to evenings; labs that can't go online get evening or Saturday slots; anything left is flagged with a reason.</aside>
+</section>

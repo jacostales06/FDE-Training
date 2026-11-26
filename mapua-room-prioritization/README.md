@@ -131,13 +131,27 @@ Options: `--data <folder of CSVs>`, `--config <settings.json>` and `--out <folde
 
 **SQL dialect:** The view uses SQLite syntax. For PostgreSQL or MySQL, replace the two-argument `MIN(x, 1)` with `LEAST(x, 1)`.
 
-## 9. Limitations and next steps
+## 9. Presentation and integrations
+
+The 5-slide Session 2 deck is in [`presentation/`](presentation/):
+
+| File | What it is |
+|---|---|
+| [`RoomPrioritization_v2_deck.pdf`](presentation/RoomPrioritization_v2_deck.pdf) | The deck as a PDF, one slide per page |
+| [`RoomPrioritization_v2_deck.html`](presentation/RoomPrioritization_v2_deck.html) | The deck as one standalone web page |
+| `slides/*.html`, `deck.css`, `deck.json` | Slide sources, with speaker notes in each slide's `<aside>` |
+
+Slides: 1. The problem · 2. The improved solution · 3. What changed since Session 1 · 4. Results · 5. MCP connections.
+
+The results were also sent to Google Workspace through MCP connectors: a Google Doc report, a Google Sheet (Sections, Room timetable, KPIs) and a Gmail draft to department chairs. The draft is not sent; a person reviews and sends it.
+
+## 10. Limitations and next steps
 
 - **Student timetable conflicts:** the engine prevents room double-booking but doesn't yet stop two required courses of the same block section from landing in the same time slot. The next step is block-section conflict constraints, for example with OR-Tools CP-SAT.
 - **Faculty:** faculty loading and availability aren't modelled yet.
 - **Historical rates:** demand forecasting could use pass and fail rates from past terms.
 
-## 10. Suggested rollout
+## 11. Suggested rollout
 
 1. Clean and link the four data sources: student information system, curriculum, and room inventory.
 2. Build the demand forecast and the priority view.
